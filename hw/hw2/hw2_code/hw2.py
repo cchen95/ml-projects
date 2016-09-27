@@ -33,7 +33,17 @@ def train(X_train, y_train, reg=0):
 
 def train_gd(X_train, y_train, alpha=0.1, reg=0, num_iter=10000):
     ''' Build a model from X_train -> y_train using batch gradient descent '''
-    return np.zeros((X_train.shape[1], NUM_CLASSES))
+    x_shape = np.shape(X_train)
+    y_shape = np.shape(y_train)
+    w = np.zeros((x_shape[1], y_shape[1]))
+    xt = np.transpose(X_train)
+    xtx = np.dot(xt, X_train)
+    xty = np.dot(xt, y_train)
+    xtxreg = xtx + reg
+    while num_iter > 0:
+        w = w - alpha / x_shape[1] * (np.dot(xtxreg, w) - xty)
+        num_iter -= 1
+    return w
 
 def train_sgd(X_train, y_train, alpha=0.1, reg=0, num_iter=10000):
     ''' Build a model from X_train -> y_train using stochastic gradient descent '''
@@ -51,8 +61,8 @@ def predict(model, X):
 def phi(X):
     ''' Featurize the inputs using random Fourier features '''
 
-    print(np.shape(G))
-    print(np.shape(X))
+    # print(np.shape(G))
+    # print(np.shape(X))
     new_matrix = np.dot(X, G)
 
     # for x_row in X:
@@ -73,7 +83,7 @@ def phi(X):
     new_matrix += b
     new_matrix = np.cos(new_matrix)
     new_matrix = np.sqrt(2.0/d)*new_matrix
-    print(np.shape(new_matrix))
+    # print(np.shape(new_matrix))
     return new_matrix
 
 
@@ -90,12 +100,12 @@ if __name__ == "__main__":
     print("Train accuracy: {0}".format(metrics.accuracy_score(labels_train, pred_labels_train)))
     print("Test accuracy: {0}".format(metrics.accuracy_score(labels_test, pred_labels_test)))
 
-    # model = train_gd(X_train, y_train, alpha=1e-3, reg=0.1, num_iter=20000)
-    # pred_labels_train = predict(model, X_train)
-    # pred_labels_test = predict(model, X_test)
-    # print("Batch gradient descent")
-    # print("Train accuracy: {0}".format(metrics.accuracy_score(labels_train, pred_labels_train)))
-    # print("Test accuracy: {0}".format(metrics.accuracy_score(labels_test, pred_labels_test)))
+    model = train_gd(X_train, y_train, alpha=2e-1, reg=0.5, num_iter=20000)
+    pred_labels_train = predict(model, X_train)
+    pred_labels_test = predict(model, X_test)
+    print("Batch gradient descent")
+    print("Train accuracy: {0}".format(metrics.accuracy_score(labels_train, pred_labels_train)))
+    print("Test accuracy: {0}".format(metrics.accuracy_score(labels_test, pred_labels_test)))
 
     # model = train_sgd(X_train, y_train, alpha=1e-3, reg=0.1, num_iter=100000)
     # pred_labels_train = predict(model, X_train)
